@@ -12,6 +12,7 @@ CONST CHAR* g_OPERATIONS[] = { "+", "-", "*", "/" };
 
 INT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 VOID SetSkin(HWND hwnd, CONST CHAR sz_skin[]);
+VOID SetSkinFromDLL(HWND hwnd, CONST CHAR sz_skin[]);
 
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, INT nCmdShow)
 {
@@ -212,8 +213,9 @@ INT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			0
 		);
 
-		SetSkin(hwnd, "square_blue");
+		SetSkinFromDLL(hwnd, "square_blue");
 		AddFontResourceEx("Fonts\\ofont.ru_Borsok.ttf", FR_PRIVATE, 0);
+		//AddFontResourceEx("Fonts\\ofont.ru_Margot Xtrafette.ttf", FR_PRIVATE, 0);
 		HFONT hFont = CreateFont
 		(
 			g_i_FONT_HEIGHT, g_i_FONT_WIDTH,
@@ -226,6 +228,7 @@ INT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			ANTIALIASED_QUALITY,
 			DEFAULT_PITCH,
 			"Borsok"
+			//"Margot Xtrafette"
 			//"Tahoma"
 		);
 		SendMessage(hEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
@@ -460,7 +463,7 @@ INT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		//case IDR_JELLY_BIBI_2:	SetSkin(hwnd, "jelly_bibi_2"); break;
 		}
 		index = item - IDR_SQUARE_BLUE;
-		SetSkin(hwnd, g_SKINS[index]);
+		SetSkinFromDLL(hwnd, g_SKINS[index]);
 
 		HWND hEditDisplay = GetDlgItem(hwnd, IDC_EDIT_DISPLAY);
 		HDC hdcDisplay = GetDC(hEditDisplay);
@@ -515,4 +518,22 @@ VOID SetSkin(HWND hwnd, CONST CHAR sz_skin[])
 		SendMessage(GetDlgItem(hwnd, IDC_BUTTON_0 + i), BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
 	}*/
 
+}
+VOID SetSkinFromDLL(HWND hwnd, CONST CHAR sz_skin[])
+{
+	HMODULE hSkin = LoadLibrary("square_blue");
+	for (int i = IDC_BUTTON_0; i <= IDC_BUTTON_EQUAL; i++)
+	{
+		HBITMAP bmpButton = (HBITMAP)LoadImage
+		(
+			hSkin,
+			MAKEINTRESOURCE(i),
+			IMAGE_BITMAP,
+			i > IDC_BUTTON_0		? g_i_BUTTON_SIZE : g_i_BUTTON_DOUBLE_SIZE,
+			i < IDC_BUTTON_EQUAL	? g_i_BUTTON_SIZE : g_i_BUTTON_DOUBLE_SIZE,
+			LR_SHARED
+		);
+		SendMessage(GetDlgItem(hwnd, i), BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)bmpButton);
+	}
+	FreeLibrary(hSkin);
 }
